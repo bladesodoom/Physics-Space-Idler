@@ -1,3 +1,5 @@
+using TMPro;
+
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -12,16 +14,26 @@ public class ClickSpawn : MonoBehaviour
     public Button upgradeValueBTN;
     public Blackhole blackholeScript;
 
+    public TextMeshProUGUI rateCostText;
+    public TextMeshProUGUI rateChangeText;
+
+    public TextMeshProUGUI quantityCostText;
+    public TextMeshProUGUI quantityChangeText;
+
+    public TextMeshProUGUI valueCostText;
+    public TextMeshProUGUI valueChangeText;
+
     private Collider2D spawnAreaCollider;
+
     private int spawnQuantity = 1;
     private float spawnQTYCost = 20;
     private float spawnQTYscale = 2.4f;
     private int spawnQTYMax = 5;
+
     private float spawnRate = 0.5f;
     private float spawnRateMax = 20;
     private float spawnCooldown = 0;
-
-    private float spawnUpgradeCost = 5;
+    private float spawnRateCost = 5;
     private float spawnRateScale = 1.3f;
     private float spawnCostScale = 2.2f;
 
@@ -31,7 +43,10 @@ public class ClickSpawn : MonoBehaviour
     private float matterValueCost = 35;
     private float matterValueCostScale = 2.6f;
 
-
+    /* TODO 
+        - Make upgrade buttons say "MAX" showing the last upgrade value of the quantity, rate etc
+        - Make second to last upgrade show the max value on the right side of the ">"
+    */
 
 
     void Awake()
@@ -39,6 +54,10 @@ public class ClickSpawn : MonoBehaviour
         spawnAreaCollider = GetComponent<Collider2D>();
         spawnCooldown = 1f / spawnRate;
         upgradeMenu.SetActive(false);
+        upgradeQTYBTN.interactable = false;
+        upgradeRateBTN.interactable = false;
+        upgradeValueBTN.interactable = false;
+        UpdateText();
     }
 
     void Update()
@@ -65,61 +84,88 @@ public class ClickSpawn : MonoBehaviour
                 upgradeMenu.SetActive(false);
             }
         }
+        CompareBalanceCost();
+    }
+
+    private void CompareBalanceCost()
+    {
+        float currentBalance = blackholeScript.GetBalance();
+
+        if (currentBalance >= spawnRateCost)
+        {
+            upgradeRateBTN.interactable = true;
+        }
+        else if (currentBalance >= spawnQTYCost)
+        {
+            upgradeQTYBTN.interactable = true;
+        }
+        else if (currentBalance >= matterValueCost)
+        {
+            upgradeValueBTN.interactable = true;
+        }
+        else
+        {
+            upgradeRateBTN.interactable = false;
+            upgradeValueBTN.interactable = false;
+            upgradeQTYBTN.interactable = false;
+        }
+    }
+    private void UpdateText()
+    {
+        float newRateText = (float)System.Math.Round(spawnRate * spawnRateScale, 2);
+
+        rateCostText.text = "Cost: " + System.Math.Round(spawnRateCost).ToString();
+        rateChangeText.text = System.Math.Round(spawnRate, 2).ToString() + " > " + newRateText.ToString();
+
+        int newQTYText = spawnQuantity + 1;
+
+        quantityCostText.text = System.Math.Round(spawnQTYCost, 2).ToString();
+        quantityChangeText.text = spawnQuantity.ToString() + " > " + newQTYText.ToString();
+
+        float newValueText = (float)System.Math.Round(matterValue * matterValueScale, 2);
+
+        valueCostText.text = "Cost: " + matterValueCost.ToString();
+        valueChangeText.text = matterValue.ToString() + " > " + newValueText.ToString();
     }
 
     public void IncreaseMatterValue()
     {
-        if (blackholeScript.GetBalance() < matterValueCost)
+        if (blackholeScript.GetBalance() < matterValueCost) { return; }
+        blackholeScript.RemoveMoney(matterValueCost);
+        matterValue *= matterValueScale;
+        matterValueCost *= matterValueCostScale;
+        UpdateText();
+        if (matterValue >= matterValueMax)
         {
-            return;
+            matterValue = matterValueMax;
+            upgradeValueBTN.gameObject.SetActive(false);
         }
-        else
-        {
-            blackholeScript.RemoveMoney(matterValueCost);
-            matterValue *= matterValueScale;
-            matterValueCost *= matterValueCostScale;
-            if (matterValue >= matterValueMax)
-            {
-                matterValue = matterValueMax;
-                upgradeValueBTN.interactable = false;
-            }
-        }
+
     }
     public void IncreaseSpawnRate()
     {
-        if (blackholeScript.GetBalance() < spawnUpgradeCost)
+        if (blackholeScript.GetBalance() < spawnRateCost) { return; }
+        blackholeScript.RemoveMoney(spawnRateCost);
+        spawnRate *= spawnRateScale;
+        spawnRateCost *= spawnCostScale;
+        UpdateText();
+        if (spawnRate >= spawnRateMax)
         {
-            return;
-        }
-        else
-        {
-            blackholeScript.RemoveMoney(spawnUpgradeCost);
-            spawnRate *= spawnRateScale;
-            spawnUpgradeCost *= spawnCostScale;
-            if (spawnRate >= spawnRateMax)
-            {
-                upgradeRateBTN.interactable = false;
-            }
+            upgradeRateBTN.gameObject.SetActive(false);
         }
     }
 
     public void IncreaseSpawnQTY()
     {
-        if (blackholeScript.GetBalance() < spawnQTYCost)
+        if (blackholeScript.GetBalance() < spawnQTYCost) { return; }
+        blackholeScript.RemoveMoney(spawnQTYCost);
+        spawnQuantity += 1;
+        spawnQTYCost *= spawnQTYscale;
+        UpdateText();
+        if (spawnQuantity >= spawnQTYMax)
         {
-            return;
+            upgradeQTYBTN.gameObject.SetActive(false);
         }
-        else
-        {
-            blackholeScript.RemoveMoney(spawnQTYCost);
-            spawnQuantity += 1;
-            spawnQTYCost *= spawnQTYscale;
-            if (spawnQuantity >= spawnQTYMax)
-            {
-                upgradeQTYBTN.interactable = false;
-            }
-        }
-
     }
 
 
