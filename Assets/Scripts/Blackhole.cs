@@ -16,7 +16,6 @@ public class Blackhole : MonoBehaviour
             AddMoney(matterScript.value);
             UpdateMoneyText();
             Destroy(matterScript.gameObject);
-            Debug.Log("Matter Value: " + matterScript.value);
         }
     }
 

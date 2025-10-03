@@ -11,7 +11,7 @@ public class Pegs : MonoBehaviour
     void Start()
     {
         posZRotate = Random.Range(15f, 50f);
-        negZRotate = Random.Range(-50f, 15f);
+        negZRotate = Random.Range(-50f, -15f);
 
         deltaZRotate = posZRotate + negZRotate;
     }

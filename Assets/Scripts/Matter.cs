@@ -10,9 +10,9 @@ public class Matter : MonoBehaviour
         {
             Pegs pegScript = collider.gameObject.GetComponent<Pegs>();
             AddVal(pegScript.value);
-            Debug.Log("New Value: " + value);
         }
     }
 
+    public void SetValue(float value) { this.value = value; }
     private void AddVal(float amount) { value += amount; }
 }

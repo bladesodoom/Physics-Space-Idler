@@ -1,45 +1,28 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class TurretSpawner : MonoBehaviour
 {
-    public float maxSwing = 80f;
-    public float turnSpeed = 10f;
-
     public GameObject matterPrefab;
     public Transform firePoint;
-    public float fireRate = 0.5f;
-    public float firePower = 0.5f;
+    public Button upgradeFireRateBTN;
+    public Button upgradeMatterValueBTN;
 
+    private float fireRate = 0.5f;
+    private float firePower = 0.5f;
+    private float fireRateMax = 30;
+    private float fireRateScale = 1.36f;
+    private float fireRateCost = 70;
+    private float fireRateCostScale = 1.28f;
     private float fireCooldown;
-    private float angleDirection = 1f;
-    private float currentOffset = 0f;
-    private float initialAngle;
-
-    void Start()
-    {
-        float rawAngle = transform.localEulerAngles.z;
-        if (rawAngle > 180f) rawAngle -= 360f;
-
-        float[] allowedAngles = { -90f, 90f, 180f };
-        initialAngle = allowedAngles[0];
-        float minDiff = Mathf.Abs(rawAngle - allowedAngles[0]);
-
-        for (int i = 1; i < allowedAngles.Length; i++)
-        {
-            float diff = Mathf.Abs(rawAngle - allowedAngles[i]);
-            if (diff < minDiff)
-            {
-                minDiff = diff;
-                initialAngle = allowedAngles[i];
-            }
-        }
-        transform.localRotation = Quaternion.Euler(0f, 0f, initialAngle);
-    }
+    private float matterValue = 1f;
+    private float matterValueMax = 15f;
+    private float matterValueScale = 1.1f;
+    private float matterValueCost = 50f;
+    private float matterValueCostScale = 1.6f;
 
     void Update()
     {
-        Oscillate();
-
         fireCooldown -= Time.deltaTime;
         if (fireCooldown <= 0f)
         {
@@ -48,23 +31,26 @@ public class TurretSpawner : MonoBehaviour
         }
     }
 
-    void Oscillate()
+    public void IncreaseFireRate()
     {
-        currentOffset += angleDirection * turnSpeed * Time.deltaTime;
-
-        if (currentOffset > maxSwing)
+        fireRate *= fireRateScale;
+        fireRateCost *= fireRateCostScale;
+        if (fireRate >= fireRateMax)
         {
-            currentOffset = maxSwing;
-            angleDirection = -1f;
+            fireRate = fireRateMax;
+            upgradeFireRateBTN.interactable = false;
         }
-        else if (currentOffset < -maxSwing)
-        {
-            currentOffset = -maxSwing;
-            angleDirection = 1f;
-        }
+    }
 
-        float finalAngle = initialAngle + currentOffset;
-        transform.localRotation = Quaternion.Euler(0f, 0f, finalAngle);
+    public void IncreaseMatterValue()
+    {
+        matterValue *= matterValueScale;
+        matterValueCost *= matterValueCostScale;
+        if (matterValue >= matterValueMax)
+        {
+            matterValue = matterValueMax;
+            upgradeMatterValueBTN.interactable = false;
+        }
     }
 
     void Fire()
@@ -72,6 +58,7 @@ public class TurretSpawner : MonoBehaviour
         if (matterPrefab != null && firePoint != null)
         {
             GameObject spawned = Instantiate(matterPrefab, firePoint.position, firePoint.rotation);
+            spawned.GetComponent<Matter>().SetValue(matterValue);
 
             Rigidbody2D rb = spawned.GetComponent<Rigidbody2D>();
             if (rb != null)

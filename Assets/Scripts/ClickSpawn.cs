@@ -1,22 +1,37 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class ClickSpawn : MonoBehaviour
 {
     public GameObject objectToSpawn;
     public GameObject upgradeMenu;
-
+    public Button upgradeRateBTN;
+    public Button upgradeQTYBTN;
+    public Button upgradeValueBTN;
     public Blackhole blackholeScript;
 
     private Collider2D spawnAreaCollider;
     private int spawnQuantity = 1;
-    private float spawnRate = 1.0f;
+    private float spawnQTYCost = 20;
+    private float spawnQTYscale = 2.4f;
+    private int spawnQTYMax = 5;
+    private float spawnRate = 0.5f;
+    private float spawnRateMax = 20;
     private float spawnCooldown = 0;
 
     private float spawnUpgradeCost = 5;
     private float spawnRateScale = 1.3f;
-    private float spawnCostScale = 1.2f;
+    private float spawnCostScale = 2.2f;
+
+    private float matterValue = 1;
+    private float matterValueScale = 3.8f;
+    private float matterValueMax = 25;
+    private float matterValueCost = 35;
+    private float matterValueCostScale = 2.6f;
+
+
 
 
     void Awake()
@@ -28,7 +43,7 @@ public class ClickSpawn : MonoBehaviour
 
     void Update()
     {
-        if (spawnCooldown <= 0f && Mouse.current.leftButton.wasPressedThisFrame)
+        if (spawnCooldown <= 0f && Mouse.current.leftButton.IsPressed())
         {
             SpawnObject();
             spawnCooldown = 1f / spawnRate;
@@ -52,6 +67,24 @@ public class ClickSpawn : MonoBehaviour
         }
     }
 
+    public void IncreaseMatterValue()
+    {
+        if (blackholeScript.GetBalance() < matterValueCost)
+        {
+            return;
+        }
+        else
+        {
+            blackholeScript.RemoveMoney(matterValueCost);
+            matterValue *= matterValueScale;
+            matterValueCost *= matterValueCostScale;
+            if (matterValue >= matterValueMax)
+            {
+                matterValue = matterValueMax;
+                upgradeValueBTN.interactable = false;
+            }
+        }
+    }
     public void IncreaseSpawnRate()
     {
         if (blackholeScript.GetBalance() < spawnUpgradeCost)
@@ -63,8 +96,32 @@ public class ClickSpawn : MonoBehaviour
             blackholeScript.RemoveMoney(spawnUpgradeCost);
             spawnRate *= spawnRateScale;
             spawnUpgradeCost *= spawnCostScale;
+            if (spawnRate >= spawnRateMax)
+            {
+                upgradeRateBTN.interactable = false;
+            }
         }
     }
+
+    public void IncreaseSpawnQTY()
+    {
+        if (blackholeScript.GetBalance() < spawnQTYCost)
+        {
+            return;
+        }
+        else
+        {
+            blackholeScript.RemoveMoney(spawnQTYCost);
+            spawnQuantity += 1;
+            spawnQTYCost *= spawnQTYscale;
+            if (spawnQuantity >= spawnQTYMax)
+            {
+                upgradeQTYBTN.interactable = false;
+            }
+        }
+
+    }
+
 
     private bool IsPointerOverUIObject()
     {
@@ -76,7 +133,8 @@ public class ClickSpawn : MonoBehaviour
         Vector3 worldPos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
         if (spawnAreaCollider != null && spawnAreaCollider.OverlapPoint(worldPos))
         {
-            Vector2 menuPos = (Vector2)worldPos;
+            Vector2 offset = new Vector2(-1, 1);
+            Vector2 menuPos = (Vector2)worldPos - offset;
             upgradeMenu.transform.position = menuPos;
             upgradeMenu.SetActive(true);
         }
@@ -95,7 +153,8 @@ public class ClickSpawn : MonoBehaviour
 
             if (spawnAreaCollider != null && spawnAreaCollider.OverlapPoint(spawnPos))
             {
-                Instantiate(objectToSpawn, new Vector2(spawnPos.x, spawnPos.y), rotation);
+                GameObject newMatter = Instantiate(objectToSpawn, new Vector2(spawnPos.x, spawnPos.y), rotation);
+                newMatter.GetComponent<Matter>().SetValue(matterValue);
             }
         }
     }
