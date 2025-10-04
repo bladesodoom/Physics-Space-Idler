@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Pegs : MonoBehaviour
+public class PegOld : MonoBehaviour
 {
     private float posZRotate;
     private float negZRotate;

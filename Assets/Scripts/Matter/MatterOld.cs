@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Matter : MonoBehaviour
+public class MatterOld : MonoBehaviour
 {
     public float value = 1f;
 
@@ -8,7 +8,7 @@ public class Matter : MonoBehaviour
     {
         if (collider.gameObject.CompareTag("Peg"))
         {
-            Pegs pegScript = collider.gameObject.GetComponent<Pegs>();
+            PegOld pegScript = collider.gameObject.GetComponent<PegOld>();
             AddVal(pegScript.value);
         }
     }

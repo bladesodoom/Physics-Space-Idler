@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TurretSpawner : MonoBehaviour
+public class TurretOld : MonoBehaviour
 {
     public GameObject matterPrefab;
     public Transform firePoint;
@@ -58,7 +58,7 @@ public class TurretSpawner : MonoBehaviour
         if (matterPrefab != null && firePoint != null)
         {
             GameObject spawned = Instantiate(matterPrefab, firePoint.position, firePoint.rotation);
-            spawned.GetComponent<Matter>().SetValue(matterValue);
+            spawned.GetComponent<MatterOld>().SetValue(matterValue);
 
             Rigidbody2D rb = spawned.GetComponent<Rigidbody2D>();
             if (rb != null)

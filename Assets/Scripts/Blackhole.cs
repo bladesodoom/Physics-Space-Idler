@@ -12,7 +12,7 @@ public class Blackhole : MonoBehaviour
     {
         if (collider.gameObject.CompareTag("Matter"))
         {
-            Matter matterScript = collider.gameObject.GetComponent<Matter>();
+            MatterOld matterScript = collider.gameObject.GetComponent<MatterOld>();
             AddMoney(matterScript.value);
             UpdateMoneyText();
             Destroy(matterScript.gameObject);
